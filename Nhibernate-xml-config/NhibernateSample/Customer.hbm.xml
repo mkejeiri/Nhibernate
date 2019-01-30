@@ -5,7 +5,8 @@
     <!--<id name="Id" column="id" type="Int32">
       <generator class="native"/>
     </id>-->
-    
+    <!--max_lo * NextValue +NextValue-->
+    <!--(max_lo + 1) * NextValue-->
     <id name="Id" unsaved-value="0">
       <generator class="hilo">
         <param name="table">HiValue</param>

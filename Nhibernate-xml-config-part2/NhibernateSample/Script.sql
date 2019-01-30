@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE TABLE [dbo].[Customers](
-	[id] [int] NOT NULL,
+	[id] [int] IDENTITY(1,1) NOT NULL,
 	[FirstName] [nvarchar](50) NULL,
 	[LastName] [nvarchar](50) NULL,
 	[Points] [int] NULL,
@@ -26,19 +26,5 @@ CREATE TABLE [dbo].[Customers](
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
-GO
-
-
-/****** Object:  Table [dbo].[HiValue]    Script Date: 1/30/2019 2:50:42 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE TABLE [dbo].[HiValue](
-	[NextValue] [int] NULL
-) ON [PRIMARY]
-GO
 
 

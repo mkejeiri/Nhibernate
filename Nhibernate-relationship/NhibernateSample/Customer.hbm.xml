@@ -3,10 +3,10 @@
 <!--max_lo * NextValue +NextValue-->
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="NhibernateSample" namespace="NhibernateSample">
   <class name="Customer" table="Customers">
-    <id name="Id" column="id" type="Int32">
-      <generator class="native"/>
+    <id name="Id" >
+      <generator class="guid.comb"/>
     </id>
-    <property name="FirstName"/> 
+    <property name="FirstName"/>
     <property name="LastName"/>
     <property name="AverageRating"/>
     <property name="Points"/>
@@ -24,6 +24,18 @@
       <property name="Province"/>
       <property name="Country"/>
     </component>
+    <!--use ` for reserved keyword-->
+    <!--<set name="Orders" table="`Order`">-->
+    <!--it would be better to do the sorting in the code (Linq)-->
+    <!--<set name="Orders" table="Orders" order-by="OrderAt desc">-->
+    <!--fetch="join" one round trip with select outer join between customer and orders-->
+    <set name="Orders" table="Orders" cascade="all-delete-orphan" fetch="join">
+      <key column="CustomerId"/>
+      <one-to-many class="Order"/>
+    </set>
+    <!--<list name="Orders" table="Orders"><key column="CustomerId"/> -->
+    <!--it need an indexList column to store the position in the list-->
+    <!--<index column="indexList"/><one-to-many class="Order"/></list>-->
   </class>
 </hibernate-mapping>
 
