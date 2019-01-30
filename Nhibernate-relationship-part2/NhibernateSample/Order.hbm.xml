@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--this file should be included as Content and copy-->
+<!--max_lo * NextValue +NextValue-->
+<hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="NhibernateSample" namespace="NhibernateSample">
+  <class name="Order" table="Orders">
+    <id name="Id">
+      <generator class="guid.comb"/>
+    </id>
+    <property name="OrderAt"/>
+    <property name="ShippedAt"/>
+    <component name="ShipTo">
+      <property name="Street"/>
+      <property name="City"/>
+      <property name="Province"/>
+      <property name="Country"/>
+    </component>
+    <!--cascade="save-update" : if an order is deleted we keep the customer-->
+    <many-to-one name="Customer" column="CustomerId" cascade="save-update"/>
+  </class>
+</hibernate-mapping>
+
