@@ -27,24 +27,46 @@ namespace NhibernateSample
                 x.ConnectionStringName = "default"; //from App.config
                 x.Driver<SqlClientDriver>();
                 x.Dialect<MsSql2012Dialect>(); 
-                x.LogSqlInConsole = true;
+                x.LogSqlInConsole = false;
                 x.IsolationLevel = IsolationLevel.Unspecified;
+                //default is 20, how many insert/update to push in group to the db, supported only by Oracle and Sqlserver
+                x.BatchSize = 200;
             });
 
             //use that for statistics along with nhibernate profiler
             cfg.SessionFactory().GenerateStatistics();
-            cfg.AddAssembly(Assembly.GetExecutingAssembly());
+
+            //high level cashing, we could also do it in config file or in individual config files
+            //cfg.SessionFactory().Caching;
+           cfg.AddAssembly(Assembly.GetExecutingAssembly());
             //End loquacious (talkative) config introduced in 3.0
 
             var sessionFactory = cfg.BuildSessionFactory();
             //Call demo methods here
-            SessionDemo7 (sessionFactory);
+            SessionDemo9 (sessionFactory);
             SessionDemo8(sessionFactory);
 
             Console.WriteLine($"Press any key to continue...");
             Console.ReadKey();
         }
 
+
+        private static void SessionDemo9(ISessionFactory sessionFactory)
+        {
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                for (int i = 1; i < 201; i++)
+                {
+                    var customer = CreateCustomer();
+                    customer.LastName = $"{customer.LastName} {i}";
+                    session.Save(customer);
+                    Console.WriteLine(customer);
+                }
+                tx.Commit();
+            }
+
+        }
 
         private static void SessionDemo8(ISessionFactory sessionFactory)
         {
@@ -80,8 +102,8 @@ namespace NhibernateSample
         {
            return  new Customer()
            {
-               FirstName = "John3",
-               LastName = "Doe3",
+               FirstName = "John",
+               LastName = "Doe",
                //LastName = new string('D', 100), //give an exception 
                Points = 100,
                HasGoldStatus = true,
