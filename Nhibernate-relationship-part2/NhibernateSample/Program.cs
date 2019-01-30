@@ -68,7 +68,7 @@ namespace NhibernateSample
                 var query = from customer in session.Query<Customer>()
                     select customer;
                 Console.WriteLine("Linqed:");
-                //fetch allows eager left outer join Orders other N+1 trip PB.
+                //fetch allows eager left outer join Orders otherwise N+1 trip PB.
                 //var reloaded = query.Fetch(x => x.Orders).First();
                 //N+1
                 var leftOuterJoin = query.Fetch(x=>x.Orders).ToList(); //or var leftOuterJoin = query.Fetch(x => x.Orders);
@@ -95,7 +95,7 @@ namespace NhibernateSample
                 var query = from customer in session.Query<Customer>()
                     select customer;
                 Console.WriteLine("Linqed:");
-                //fetch allows eager left outer join Orders other N+1 trip PB.
+                //fetch allows eager left outer join Orders otherwise N+1 trip PB.
                 //var reloaded = query.Fetch(x => x.Orders).First();
                 //N+1
                 var NPlusOnePb = query.ToList();//all customer is eagerly loaded without orders
@@ -143,7 +143,7 @@ namespace NhibernateSample
                              where customer.Id == id
                     select customer;
                 Console.WriteLine("Linqed:");
-                //fetch allows eager left outer join Orders other N+1 trip PB.
+                //fetch allows eager left outer join Orders otherwise N+1 trip PB.
                 var reloaded = query.Fetch(x => x.Orders).First();
                 Console.WriteLine(reloaded);
 
