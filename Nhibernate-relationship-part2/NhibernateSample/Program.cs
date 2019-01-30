@@ -51,11 +51,26 @@ namespace NhibernateSample
             var sessionFactory = cfg.BuildSessionFactory();
             //Call demo methods here
             //Call demo methods here
-            SessionDemo12(sessionFactory);
+            SessionDemo13(sessionFactory);
 
             Console.WriteLine($"Press any key to continue...");
             Console.ReadKey();
         }
+        private static void SessionDemo13(ISessionFactory sessionFactory)
+        {
+            Guid id;
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                var newCustomer = CreateCustomer();
+                Console.WriteLine("New Customer");
+                Console.WriteLine(newCustomer);
+                session.Save(newCustomer);
+                tx.Commit();
+            }
+        }
+
+
 
         private static void SessionDemo12(ISessionFactory sessionFactory)
         {
@@ -429,6 +444,12 @@ namespace NhibernateSample
         //public virtual string Country { get; set; }
         public virtual Location Address { get; set; }
         public virtual ISet<Order> Orders { get; set; }
+
+        public virtual void addOrder(Order order)
+        {
+            Orders.Add(order);
+            order.Customer = this;
+        }
 
         public override string ToString()
         {

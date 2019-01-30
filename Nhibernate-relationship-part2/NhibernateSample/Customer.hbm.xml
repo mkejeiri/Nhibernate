@@ -24,12 +24,19 @@
       <property name="Province"/>
       <property name="Country"/>
     </component>
+    
     <!--use ` for reserved keyword-->
     <!--<set name="Orders" table="`Order`">-->
+    
     <!--it would be better to do the sorting in the code (Linq)-->
     <!--<set name="Orders" table="Orders" order-by="OrderAt desc">-->
+
     <!--fetch="join" one round trip with select outer join between customer and orders-->
-    <set name="Orders" table="Orders" cascade="all-delete-orphan" fetch="join">
+
+    <!--inverse="true" allow nhibernate to do not an update of the FK due to bidirectional relation (at object level)
+    if unidirectional, e.g customer.orders and without order.customer property setting inverse="true" would prevent fk to be set...
+    -->
+    <set name="Orders" table="Orders" cascade="all-delete-orphan" fetch="join" inverse="true">
       <key column="CustomerId"/>
       <one-to-many class="Order"/>
     </set>

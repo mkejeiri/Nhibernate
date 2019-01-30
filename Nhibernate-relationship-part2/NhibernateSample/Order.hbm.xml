@@ -15,6 +15,7 @@
       <property name="Country"/>
     </component>
     <!--cascade="save-update" : if an order is deleted we keep the customer-->
+    <!--doesn't have inverse="true", you could set it only in one-to-many, in case of many-to-many set it in either! -->
     <many-to-one name="Customer" column="CustomerId" cascade="save-update"/>
   </class>
 </hibernate-mapping>
