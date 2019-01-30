@@ -19,6 +19,9 @@ namespace NhibernateSample
             NHibernateProfiler.Initialize();
 
             var cfg = new Configuration();
+            //load the config file  hibernate.cfg.xml
+            //cfg.Configure();
+
             //loquacious (talkative) config introduced in 3.0
             // Customer.hbm.xml file should be included as Embedded Resource
             cfg.DataBaseIntegration(x =>
@@ -26,9 +29,9 @@ namespace NhibernateSample
                 //x.ConnectionString = @"Server=localhost;Data Source =.\; Database=CRMDB;Integrated Security=SSPI";
                 x.ConnectionStringName = "default"; //from App.config
                 x.Driver<SqlClientDriver>();
-                x.Dialect<MsSql2012Dialect>(); 
+                x.Dialect<MsSql2012Dialect>();
                 x.LogSqlInConsole = false;
-                x.IsolationLevel = IsolationLevel.Unspecified;
+                x.IsolationLevel = IsolationLevel.RepeatableRead ;
                 //default is 20, how many insert/update to push in group to the db, supported only by Oracle and Sqlserver
                 x.BatchSize = 200;
             });
@@ -40,6 +43,9 @@ namespace NhibernateSample
             //cfg.SessionFactory().Caching;
            cfg.AddAssembly(Assembly.GetExecutingAssembly());
             //End loquacious (talkative) config introduced in 3.0
+
+            //load the config file  hibernate.cfg.xml and overrides loquacious config
+            //cfg.Configure();
 
             var sessionFactory = cfg.BuildSessionFactory();
             //Call demo methods here
