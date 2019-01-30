@@ -37,7 +37,7 @@ namespace NhibernateSample
             });
 
             //use that for statistics along with nhibernate profiler
-            cfg.SessionFactory().GenerateStatistics();
+            cfg.SessionFactory().GenerateStatistics(); 
 
             //high level cashing, we could also do it in config file or in individual config files
             //cfg.SessionFactory().Caching;
