@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<!--this file should be included as Embedded Resource-->
+<!--this file should be included as Content and copy-->
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="NhibernateSample" namespace="NhibernateSample">
   <class name="Customer" table="Customers">
     <id name="Id" column="id" type="Int32">

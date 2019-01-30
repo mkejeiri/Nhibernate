@@ -1,5 +1,4 @@
 using System;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using HibernatingRhinos.Profiler.Appender.NHibernate;
@@ -8,7 +7,7 @@ using NHibernate.Cfg;
 using NHibernate.Dialect;
 using NHibernate.Driver;
 using NHibernate.Type;
-   
+
 namespace NhibernateSample
 {
     class Program
@@ -16,31 +15,37 @@ namespace NhibernateSample
         static void Main(string[] args)
         {
             //App_Start.NHibernateProfilerBootstrapper.PreStart();
-            NHibernateProfiler.Initialize();
-
+           // NHibernateProfiler.Initialize();
+            
             var cfg = new Configuration();
-            //loquacious (talkative) config introduced in 3.0
-            // Customer.hbm.xml file should be included as Embedded Resource
+            /*
+             //loquacious (talkative) config introduced in 3.0
             cfg.DataBaseIntegration(x =>
             {
-                //x.ConnectionString = @"Server=localhost;Data Source =.\; Database=CRMDB;Integrated Security=SSPI";
-                x.ConnectionStringName = "default"; //from App.config
+                x.ConnectionStringName = "default";
                 x.Driver<SqlClientDriver>();
                 x.Dialect<MsSql2012Dialect>(); 
-                x.LogSqlInConsole = true;
-                x.IsolationLevel = IsolationLevel.Unspecified;
+                x.LogSqlInConsole = false;
             });
 
-            //use that for statistics along with nhibernate profiler
-            cfg.SessionFactory().GenerateStatistics();
             cfg.AddAssembly(Assembly.GetExecutingAssembly());
-            //End loquacious (talkative) config introduced in 3.0
+            //End loquacious (talkative) config introduced in 3.0 */
 
+            //hibernate.cfg.xml is a default name!!!
+            cfg.Configure("hibernate.cfg.xml");
+            //cfg.Configure();
+           
             var sessionFactory = cfg.BuildSessionFactory();
             //Call demo methods here
             SessionDemo7 (sessionFactory);
             SessionDemo8(sessionFactory);
-
+            cfg.DataBaseIntegration(x =>
+            {
+                x.ConnectionStringName = "default";
+                x.Driver<SqlClientDriver>();
+                x.Dialect<MsSql2012Dialect>();
+                x.LogSqlInConsole = false;
+            });
             Console.WriteLine($"Press any key to continue...");
             Console.ReadKey();
         }
