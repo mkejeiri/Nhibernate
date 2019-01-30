@@ -18,6 +18,7 @@ namespace NhibernateSample
             NHibernateProfiler.Initialize();
 
             var cfg = new Configuration();
+            //loquacious (talkative) config introduced in 3.0
             cfg.DataBaseIntegration(x =>
             {
                 x.ConnectionString = @"Server=localhost;Data Source =.\; Database=CRMDB;Integrated Security=SSPI";
@@ -27,6 +28,8 @@ namespace NhibernateSample
             });
 
             cfg.AddAssembly(Assembly.GetExecutingAssembly());
+            //End loquacious (talkative) config introduced in 3.0
+
             var sessionFactory = cfg.BuildSessionFactory();
             //Call demo methods here
             SessionDemo7 (sessionFactory);
