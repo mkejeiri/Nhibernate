@@ -10,6 +10,7 @@ using NHibernate.Dialect;
 using NHibernate.Driver;
 using NHibernate.Linq;
 using NHibernate.Type;
+using Remotion.Linq.Clauses;
 
 namespace NhibernateSample
 {
@@ -49,13 +50,271 @@ namespace NhibernateSample
             //cfg.Configure();
 
             var sessionFactory = cfg.BuildSessionFactory();
+
             //Call demo methods here
-            //Call demo methods here
-            SessionDemo13(sessionFactory);
+            SessionDemo17(sessionFactory);
 
             Console.WriteLine($"Press any key to continue...");
             Console.ReadKey();
         }
+
+
+        private static void SessionDemo17(ISessionFactory sessionFactory)
+        {
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                //W A R N I N G 
+                //We do twice the projection Queries if we call it a 2nd time we need to iterate over customers = query.ToList() instead of
+                //using the query which runs the same query again into the DB
+                //Linq using query comprehension syntax OR Query syntax + PROJECTION AND ORDER BY 
+
+                //W A R N I N G
+                //adding 2nd linq query to combined to the 1st one and before sending the entire query to DB (query.ToList() same effect as query.AsEnumerable())
+                //if we apply ToList() or AsEnumerable() (e.g.  var augmented = from c in query.ToList()), we will do the filtering in memory and not in the db 
+                //AsQueryable() doesn't call the DB for query to be run.
+                {
+                    var query = from c in session.Query<Customer>()
+                                where c.Orders.Count > 2
+                                orderby c.FirstName, c.LastName
+                                select new { c.FirstName, c.LastName, orderCount = c.Orders.Count };
+
+                   
+                    var augmented = from c in query
+                                    where c.FirstName.StartsWith("J")
+                                select c; 
+                                var customers = augmented.ToList();
+                    //foreach (var customerProjection in query.ToList()) <-- cause a run in DB each time
+                    //doesn't cause a run in DB each time, only a run im memory
+                    foreach (var customerProjection in customers)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+
+                    foreach (var customerProjection in customers)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+                }
+
+                //'augmented' filter Applied In memory, .ToList() cause the run in DB
+                {
+                    var query = from c in session.Query<Customer>()
+                        where c.Orders.Count > 2
+                        orderby c.FirstName, c.LastName
+                        select new { c.FirstName, c.LastName, orderCount = c.Orders.Count };
+
+                    var customers = query.ToList();
+                    var augmented = from c in customers
+                                    where c.FirstName.StartsWith("J")
+                        select c;
+                    
+                    //foreach (var customerProjection in query.ToList())
+                    foreach (var customerProjection in augmented)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+                }
+
+                // 'augmented' filter Applied In memory, .AsEnumerable() cause the run in DB
+                {
+                    var query = from c in session.Query<Customer>()
+                        where c.Orders.Count > 2
+                        orderby c.FirstName, c.LastName
+                        select new { c.FirstName, c.LastName, orderCount = c.Orders.Count };
+
+                    var customers = query.AsEnumerable();
+                    var augmented = from c in customers
+                        where c.FirstName.StartsWith("J")
+                        select c;
+
+                    //foreach (var customerProjection in query.ToList())
+                    foreach (var customerProjection in augmented)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+                }
+
+                //'augmented' filter Applied as comnination of query In DB , .AsQueryable() doesn't cause the run in DB
+                {
+                    var query = from c in session.Query<Customer>()
+                        where c.Orders.Count > 2
+                        orderby c.FirstName, c.LastName
+                        select new { c.FirstName, c.LastName, orderCount = c.Orders.Count };
+
+                    var customers = query.AsQueryable();
+                    var augmented = from c in customers
+                        where c.FirstName.StartsWith("J")
+                        select c;
+
+                    //foreach (var customerProjection in query.ToList())
+                    foreach (var customerProjection in augmented)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+                }
+            }
+        }
+
+        private static void SessionDemo16(ISessionFactory sessionFactory)
+        {
+            
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                //Object chaining OR Method Syntax in linq
+                {
+                    var query = session.Query<Customer>()
+                        .Where(x => x.FirstName.StartsWith("J"));
+
+                    foreach (var customer in query.ToList())
+                    {
+                        Console.WriteLine(customer.PrintShort());
+                    }
+                }
+
+
+                //Linq using query comprehension syntax OR Query syntax
+                {
+                    var query = from customer in session.Query<Customer>()
+                                where customer.FirstName.StartsWith("J")
+                                select customer;
+
+                    foreach (var customer in query.ToList())
+                    {
+                        Console.WriteLine(customer.PrintShort());
+                    }
+                }
+
+                //Linq using query comprehension syntax OR Query syntax + COUNT
+                {
+                    var query = from customer in session.Query<Customer>()
+                        where customer.Orders.Count > 2
+                        select customer;
+
+                    foreach (var customer in query.ToList())
+                    {
+                        Console.WriteLine(customer.PrintShort());
+                    }
+                }
+
+                //W A R N I N G 
+                //We do twice the projection Queries if we call it a 2nd time we need to iterate over customers = query.ToList() instead of
+                //using the query which runs the same query again into the DB
+                //Linq using query comprehension syntax OR Query syntax + PROJECTION AND ORDER BY 
+                {
+                    var query = from c in session.Query<Customer>()
+                        where c.Orders.Count > 2
+                        orderby c.FirstName, c.LastName
+                      select new {c.FirstName, c.LastName, orderCount= c.Orders.Count};
+                    var customers = query.ToList();
+                    //foreach (var customerProjection in query.ToList())
+                    foreach (var customerProjection in customers)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+
+                    foreach (var customerProjection in customers)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+
+                    foreach (var customerProjection in customers)
+                    {
+                        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                    }
+
+                }
+
+               //Linq using query comprehension syntax OR Query syntax + PROJECTION AND ORDER BY 
+                //{
+                //    var query = from c in session.Query<Customer>()
+                //        where c.Orders.Count > 2
+                //        orderby c.FirstName, c.LastName
+                //        select new { c.FirstName, c.LastName, orderCount = c.Orders.Count };
+
+                //    foreach (var customerProjection in query.ToList())
+                //    {
+                //        Console.WriteLine($"{customerProjection.FirstName} {customerProjection.LastName} {customerProjection.orderCount}");
+                //    }
+                //}
+
+                /*
+                 select customer0_.FirstName                         as col_0_0_,
+                           customer0_.LastName                          as col_1_0_,
+                           (select cast(count(*) as INT)
+                            from   Orders orders1_
+                            where  customer0_.Id = orders1_.CustomerId) as col_2_0_
+                    from   Customers customer0_
+                    where  (select cast(count(*) as INT)
+                            from   Orders orders2_
+                            where  customer0_.Id = orders2_.CustomerId) > 2 
+                                   order by customer0_.FirstName asc,
+                                   customer0_.LastName asc*/
+                tx.Commit();
+            }
+        } 
+
+        private static void SessionDemo15(ISessionFactory sessionFactory)
+        {
+            var goodId = Guid.Parse("65F76842-8A89-4590-9946-A9E501591AFB");
+            var badId = Guid.Parse("E2D91B82-E832-4F27-99F9-A9E50159D213");
+
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+                //Saving an a child entity, with load we don't need to load all customer we get just the customerId + an insert VS get = select customer + Insert
+                //var orderLoad = CreateOrder();
+                //orderLoad.Customer = session.Load<Customer>(goodId);
+                //session.Save(orderLoad);
+
+                var orderGet = CreateOrder();
+                orderGet.Customer = session.Get<Customer>(goodId);
+                session.Save(orderGet);
+                tx.Commit();
+            }
+        }
+
+        private static void SessionDemo14(ISessionFactory sessionFactory)
+        {
+            var goodId = Guid.Parse("65F76842-8A89-4590-9946-A9E501591AFB");
+            var badId = Guid.Parse("E2D91B82-E832-4F27-99F9-A9E50159D213");
+
+            using (var session = sessionFactory.OpenSession())
+            using (var tx = session.BeginTransaction())
+            {
+
+                //We GET: NULL because customer been fetched right away
+                var customerGET = session.Get<Customer>(goodId);
+                Console.WriteLine(customerGET);
+                try
+                {
+                    //Lazy loaded through proxies
+                    var customerLoaded = session.Load<Customer>(badId);
+
+                    //When we load we GET:
+                    //NHibernate.ObjectNotFoundException: 'No row with the given identifier
+                    //exists[NhibernateSample.Customer#e2d91b82-e832-4f27-99f9-a9e50159d213]'
+                    Console.WriteLine(customerLoaded);
+                }
+                catch (NHibernate.ObjectNotFoundException e)
+                {
+                    Console.WriteLine(e);
+                }
+                tx.Commit();
+            }
+        }
+
+        private static Order  CreateOrder()
+        {
+            return new Order()
+            {
+                OrderAt = DateTime.Now.AddDays(-2),
+                ShipTo = CreateAddress(),
+                ShippedAt = DateTime.UtcNow
+            };
+        }
+
         private static void SessionDemo13(ISessionFactory sessionFactory)
         {
             Guid id;
@@ -449,6 +708,13 @@ namespace NhibernateSample
         {
             Orders.Add(order);
             order.Customer = this;
+        }
+
+        public virtual string PrintShort()
+        {
+            return $"\nid: {Id}, Firstname : {FirstName}, LastName: {LastName}, Points: {Points}, " +
+                   $"HasGoldStatus:  {HasGoldStatus}, MemberSince: {MemberSince} ({MemberSince.Kind}), " +
+                   $"CreditRating: {CreditRating}, AverageRating: {AverageRating}";
         }
 
         public override string ToString()
